@@ -1,0 +1,10 @@
+variable "project_name" { type = string }
+variable "environment" { type = string }
+variable "instance_type" { type = string }
+variable "subnet_id" { type = string }
+variable "security_group_id" { type = string }
+variable "instance_profile_name" { type = string }
+variable "log_group_name" { type = string }
+variable "log_stream_name" { type = string }
+variable "artifacts_bucket_id" { type = string }
+variable "logs_bucket_id" { type = string }
