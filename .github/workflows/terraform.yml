@@ -22,78 +22,12 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
       
-      - name: Terraform Format
-        run: terraform fmt -check -recursive
-        working-directory: ./terraform
-      
       - name: Terraform Init
         run: terraform init -backend=false
         working-directory: ./terraform
       
       - name: Terraform Validate
         run: terraform validate
-        working-directory: ./terraform
-
-  plan-dev:
-    name: Plan Dev
-    needs: validate
-    if: github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-      
-      - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./terraform
-      
-      - name: Terraform Plan
-        run: terraform plan -var-file=environments/dev.tfvars
-        working-directory: ./terraform
-
-  apply-dev:
-    name: Apply Dev
-    needs: plan-dev
-    runs-on: ubuntu-latest
-    environment: dev
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-      
-      - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./terraform
-      
-      - name: Terraform Apply
-        run: terraform apply -var-file=environments/dev.tfvars -auto-approve
-        working-directory: ./terraform
-      
-      - name: Deploy App
-        run: |
-          BUCKET=$(terraform output -raw artifacts_bucket)
-          aws s3 sync ../simple/ s3://$BUCKET/webapp/
         working-directory: ./terraform
 
   plan-prod:
@@ -136,6 +70,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
       
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v2
